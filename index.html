@@ -27,40 +27,71 @@
             padding: 30px 25px 25px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
             border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: 0.4s ease;
         }
 
-        .app-header { text-align: center; margin-bottom: 25px; }
+        .hidden { display: none; }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
         .logo-circle {
-            width: 70px; height: 70px; border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
             margin: 0 auto 10px;
             background: linear-gradient(135deg, #3b3bff, #7b7bff);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: bold; font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.4rem;
             box-shadow: 0 0 15px rgba(90, 90, 255, 0.7);
         }
 
-        .app-header h1 { font-size: 1.8rem; letter-spacing: 1px; text-transform: uppercase; }
-        .app-header p { margin-top: 5px; font-size: 0.95rem; opacity: 0.8; }
+        h1 {
+            font-size: 1.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        p { opacity: 0.8; margin-bottom: 20px; }
 
         .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 0.95rem; opacity: 0.9; }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
 
         .form-group input,
         .form-group textarea,
         .form-group select {
-            width: 100%; padding: 9px 10px; border-radius: 6px;
+            width: 100%;
+            padding: 9px 10px;
+            border-radius: 6px;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            background: rgba(10, 10, 18, 0.95); color: #ffffff;
-            font-size: 0.95rem; outline: none;
+            background: rgba(10, 10, 18, 0.95);
+            color: #ffffff;
+            font-size: 0.95rem;
+            outline: none;
         }
 
         .submit-btn {
-            width: 100%; padding: 11px; margin-top: 5px;
-            border-radius: 6px; border: none;
-            background: #5865F2; color: #ffffff;
-            font-size: 1rem; font-weight: bold;
+            width: 100%;
+            padding: 11px;
+            border-radius: 6px;
+            border: none;
+            background: #5865F2;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
+            margin-top: 10px;
         }
 
         .submit-btn:hover { background: #4752C4; }
@@ -71,11 +102,41 @@
             margin-bottom: 10px;
             display: none;
         }
+
+        /* Success Screen */
+        .success-box {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-box h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .success-box p {
+            opacity: 0.85;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #5865F2;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-btn:hover { background: #4752C4; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="app-container" id="formContainer">
+
+        <!-- HEADER -->
         <div class="app-header">
             <div class="logo-circle">RL</div>
             <h1>Raven Logistics</h1>
@@ -84,6 +145,7 @@
 
         <p id="errorBox" class="error">Please fill in all required fields.</p>
 
+        <!-- APPLICATION FORM -->
         <form id="applicationForm">
             <div class="form-group">
                 <label>Full Name</label>
@@ -134,14 +196,27 @@
         </form>
     </div>
 
+    <!-- SUCCESS SCREEN (HIDDEN UNTIL SUBMISSION) -->
+    <div class="app-container hidden" id="successContainer">
+        <div class="success-box">
+            <div class="logo-circle">RL</div>
+            <h2>Application Submitted</h2>
+            <p>Thank you for applying to Raven Logistics.  
+            A staff member will contact you on Discord shortly.</p>
+
+            <a class="back-btn" onclick="goBack()">Submit Another Application</a>
+        </div>
+    </div>
+
     <script>
         const form = document.getElementById("applicationForm");
         const errorBox = document.getElementById("errorBox");
+        const formContainer = document.getElementById("formContainer");
+        const successContainer = document.getElementById("successContainer");
 
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // Validation
             const requiredFields = ["fullname", "discord", "steam", "experience", "availability", "why"];
             for (let id of requiredFields) {
                 if (!document.getElementById(id).value.trim()) {
@@ -157,35 +232,40 @@
 
             errorBox.style.display = "none";
 
-            // Build webhook message
             const payload = {
                 content: "**New Raven Logistics Application Submitted**",
                 embeds: [{
                     title: "Application Details",
                     color: 5814783,
                     fields: [
-                        { name: "Full Name", value: document.getElementById("fullname").value },
-                        { name: "Discord", value: document.getElementById("discord").value },
-                        { name: "Steam", value: document.getElementById("steam").value },
-                        { name: "Trucky / TMP ID", value: document.getElementById("trucky").value || "N/A" },
-                        { name: "Experience", value: document.getElementById("experience").value },
-                        { name: "Availability", value: document.getElementById("availability").value },
-                        { name: "Why Join?", value: document.getElementById("why").value }
+                        { name: "Full Name", value: fullname.value },
+                        { name: "Discord", value: discord.value },
+                        { name: "Steam", value: steam.value },
+                        { name: "Trucky / TMP ID", value: trucky.value || "N/A" },
+                        { name: "Experience", value: experience.value },
+                        { name: "Availability", value: availability.value },
+                        { name: "Why Join?", value: why.value }
                     ]
                 }]
             };
 
-            // Send to Discord Webhook
             await fetch("https://discord.com/api/webhooks/1441201781907390584/zUpJoBxgF7YqEy-Kz-Gi7cKADNeE4qfAyDM2pU39ugtWCZ4X6ilX8_vbliq7TI3u3EPW", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
             });
 
-            // Redirect to success page
-            window.location.href = "success.html";
+            formContainer.classList.add("hidden");
+            successContainer.classList.remove("hidden");
         });
+
+        function goBack() {
+            successContainer.classList.add("hidden");
+            formContainer.classList.remove("hidden");
+            form.reset();
+        }
     </script>
 
 </body>
 </html>
+
